@@ -1,0 +1,26 @@
+ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.row {
+    display: flex;
+    gap: 2px;
+}
+
+.square {
+    height: 17px;
+    width: 17px;
+    background: rgb(153, 153, 153);
+}
+
+.hover {
+    background: black !important;
+}
+
+.selected {
+    background: rgba(255, 0, 0, 0.781);
+}

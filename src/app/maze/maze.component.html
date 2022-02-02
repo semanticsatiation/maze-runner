@@ -1,0 +1,13 @@
+<ul>
+    <li class="row" *ngFor="let square of squares; let ri = index;">
+        <div 
+            *ngFor="let block of square; let ci = index;"
+            (mouseout)="out()" 
+            (mouseover)="toggleTile(calcInd(ri, ci)); over(calcInd(ri, ci))" 
+            (mousedown)="mouseIsDown = true"
+            (mouseup)="mouseIsDown = false"
+            (click)="clickToggle(calcInd(ri, ci))"
+            [ngClass]="[true && 'square', hover === calcInd(ri, ci) ? 'hover' : '', selected.includes(calcInd(ri, ci)) ? 'selected' : '']">
+        </div>
+    </li>
+</ul>
