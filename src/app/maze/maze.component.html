@@ -1,13 +1,51 @@
-<ul>
+<div>
+    right-click = start /
+
+    double-click = goal /
+    
+    single-click/hold = set walls
+</div>
+
+<div class="maze-options">
+    <button (click)="clearMaze()">
+        clear maze
+    </button>
+
+    <button (click)="clearPath()">
+        clear path
+    </button>
+
+    <div>
+        <label for="height">Height</label>
+        <input (change)="setHeight($event)" min="0" max="50" type="number" [value]="height">
+        <label for="width">Width</label>
+        <input (change)="setWidth($event)" min="0" max="50" type="number" [value]="width">
+    </div>
+    
+    
+    <button (click)="solve()">
+        run maze
+    </button>
+</div>
+<ul (contextmenu)="$event.preventDefault()">
     <li class="row" *ngFor="let square of squares; let ri = index;">
         <div 
             *ngFor="let block of square; let ci = index;"
-            (mouseout)="out()" 
-            (mouseover)="toggleTile(calcInd(ri, ci)); over(calcInd(ri, ci))" 
+            (mouseover)="toggleTile([ri, ci])" 
             (mousedown)="mouseIsDown = true"
             (mouseup)="mouseIsDown = false"
-            (click)="clickToggle(calcInd(ri, ci))"
-            [ngClass]="[true && 'square', hover === calcInd(ri, ci) ? 'hover' : '', selected.includes(calcInd(ri, ci)) ? 'selected' : '']">
+            (dblclick)="placeEnd([ri, ci])"
+            (click)="clickToggle([ri, ci])"
+            (contextmenu)="placeStart([ri, ci])"
+            [ngClass]="[
+                true && 'square', 
+                isPositionPresent([ri, ci]) ? 'selected' : '', 
+                calcInd(start) === calcInd([ri, ci]) ? 'start-tile' : '', 
+                calcInd(end) === calcInd([ri, ci]) ? 'end-tile' : '',
+                !isPresent(finalPath, [ri, ci]) && calcInd(start) !== calcInd([ri, ci]) && isPresent(seen, [ri, ci]) ? 'seen-tile' : '',
+                isPresent(finalPath, [ri, ci]) ? 'final-tile' : ''
+            ]"
+        >
         </div>
     </li>
 </ul>

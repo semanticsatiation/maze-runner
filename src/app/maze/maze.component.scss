@@ -3,24 +3,44 @@ ul {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    gap: 2px;
 }
 
 .row {
     display: flex;
-    gap: 2px;
 }
 
 .square {
     height: 17px;
     width: 17px;
     background: rgb(153, 153, 153);
+    margin: 0.7px;
 }
 
-.hover {
-    background: black !important;
+.square:hover {
+    filter: brightness(60%);
+}
+
+.maze-options {
+    display: flex;
+    justify-content: space-around;
 }
 
 .selected {
-    background: rgba(255, 0, 0, 0.781);
+    background: rgba(255, 52, 52, 0.781);
+}
+
+
+.final-tile {
+    background: rgb(252, 169, 62);
+}
+
+.start-tile {
+    background: rgb(0, 197, 0);
+}
+.end-tile {
+    background: rgb(0, 102, 255);
+}
+
+.seen-tile {
+    background: yellow;
 }
