@@ -1,0 +1,44 @@
+Script started on Wed Feb  9 12:46:13 2022
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+[?1034hbash-3.2$ git commit --amend
+hint: Waiting for your editor to close the file... [?1049h[>4;2m[?1h=[?2004h[?1004h[1;36r[?12h[?12l[22;2t[22;1t[27m[29m[m[H[2J[?25l[36;1H[97m[41mE325: ATTENTION[m
+Found a swap file by the name "~/maze-runner/.git/.COMMIT_EDITMSG.swp"
+[10Cowned by: ben   dated: Wed Feb 09 02:55:50 2022
+[9Cfile name: ~ben/maze-runner/.git/COMMIT_EDITMSG
+[10Cmodified: YES
+[9Cuser name: ben   host name: Ben-Air
+[8Cprocess ID: 38385
+While opening file "/Users/ben/maze-runner/.git/COMMIT_EDITMSG"
+[13Cdated: Wed Feb 09 12:46:24 2022
+      NEWER than swap file!
+
+(1) Another program may be editing the same file.  If this is the case,
+    be careful not to end up with two different instances of the same
+    file when making changes.  Quit, or continue with caution.
+(2) An edit session for this file crashed.
+    If this is the case, use ":recover" or "vim -r /Users/ben/maze-runner/.git/COMMIT_EDITMSG"
+    to recover the changes (see ":help recovery").
+    If you did this already, delete the swap file "/Users/ben/maze-runner/.git/.COMMIT_EDITMSG.swp"
+    to avoid this message.
+
+[32mSwap file "~/maze-runner/.git/.COMMIT_EDITMSG.swp" already exists![m
+[32m[O]pen Read-Only, (E)dit anyway, (R)ecover, (D)elete it, (Q)uit, (A)bort: [?25h[m[36;1H[K[36;1H[?2004l[>4;m[23;2t[23;1t
+[?1004l[?2004l[?1l>[>4;m[?1049lerror: There was a problem with the editor 'vi'.
+Please supply the message using either -m or -F option.
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ QUIT
+bash: QUIT: command not found
+bash-3.2$ quit
+bash: quit: command not found
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ [H[2Jbash-3.2$ [H[2Jbash-3.2$ [H[2Jbash-3.2$ 

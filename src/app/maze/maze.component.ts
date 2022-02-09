@@ -84,6 +84,8 @@ export class MazeComponent implements OnInit {
       } else {
         newArr.push(array);
       }
+
+      this.clearPath();
   
       this.selected = newArr;
     }
