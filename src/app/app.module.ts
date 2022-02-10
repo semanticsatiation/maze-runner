@@ -3,13 +3,13 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { MazeComponent } from './maze/maze.component';
-import { TileKeyLegendComponent } from './tile-key-legend/tile-key-legend.component';
+import { TileKeyLegendsComponent } from './tile-key-legends/tile-key-legends.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MazeComponent,
-    TileKeyLegendComponent
+    TileKeyLegendsComponent
   ],
   imports: [
     BrowserModule

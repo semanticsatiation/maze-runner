@@ -1,4 +1,4 @@
-ul {
+.maze {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,7 +13,7 @@ ul {
     height: 17px;
     width: 17px;
     background: rgb(153, 153, 153);
-    margin: 0.7px;
+    margin: 0.5px;
 }
 
 .square:hover {
@@ -25,10 +25,9 @@ ul {
     justify-content: space-around;
 }
 
-.selected {
+.wall {
     background: rgba(255, 52, 52, 0.781);
 }
-
 
 .final-tile {
     background: rgb(252, 169, 62);

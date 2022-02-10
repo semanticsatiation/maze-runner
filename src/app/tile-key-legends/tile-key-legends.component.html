@@ -1,0 +1,7 @@
+<ul class="key-list">
+    <li class="key-item" *ngFor="let key of keys;">
+        {{key[1]}}:
+        <div [class]="'square' + ' ' + key[0]">
+        </div>
+    </li>
+</ul>

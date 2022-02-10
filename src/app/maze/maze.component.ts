@@ -41,7 +41,7 @@ export class MazeComponent implements OnInit {
   branchingPaths: {
     [key: number]: number[]
   } = [];
-
+  
   isSolving:boolean = false;
 
   constructor() { }

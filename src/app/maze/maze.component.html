@@ -4,6 +4,8 @@
     double-click = goal /
     
     single-click/hold = set walls
+
+    <app-tile-key-legends></app-tile-key-legends>
 </div>
 
 <div class="maze-options">
@@ -27,7 +29,7 @@
         run maze
     </button>
 </div>
-<ul (contextmenu)="$event.preventDefault()">
+<ul class="maze" (contextmenu)="$event.preventDefault()">
     <li class="row" *ngFor="let square of squares; let ri = index;">
         <div 
             *ngFor="let block of square; let ci = index;"
@@ -39,7 +41,7 @@
             (contextmenu)="placeGoal([ri, ci], 'start')"
             [ngClass]="[
                 true && 'square', 
-                isPositionPresent([ri, ci]) ? 'selected' : '', 
+                isPositionPresent([ri, ci]) ? 'wall' : '', 
                 calcInd(start) === calcInd([ri, ci]) ? 'start-tile' : '', 
                 calcInd(end) === calcInd([ri, ci]) ? 'end-tile' : '',
                 !isPresent(finalPath, [ri, ci]) && calcInd(start) !== calcInd([ri, ci]) && isPresent(seen, [ri, ci]) ? 'seen-tile' : '',
