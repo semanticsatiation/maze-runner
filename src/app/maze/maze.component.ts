@@ -117,7 +117,6 @@ export class MazeComponent implements OnInit {
     this.finalPath = [];
     this.possiblePositions = [];
     this.branchingPaths = {};
-    this.currentPosition = this.start;
   }
 
   placeGoal(array:number[], goal:string) {
@@ -136,92 +135,6 @@ export class MazeComponent implements OnInit {
     }
   }
 
-  filterPositions() {
-    const adjacentSquares = this.findNeighbors(this.currentPosition);
-    
-    adjacentSquares.forEach(possibleChoice => {
-      if (!this.isPresent(this.possiblePositions, possibleChoice) && !this.isPresent(this.seen, possibleChoice)) {
-        this.possiblePositions.push(possibleChoice);
-        this.branchingPaths[this.calcInd(possibleChoice)] = this.currentPosition;
-      }
-    });
-    
-    return this.possiblePositions;
-  }
-
-  async solve() {
-    if (this.start.length === 2 && this.end.length === 2) {
-      this.isSolving = true;
-
-      this.clearPath();
-      this.possiblePositions = [this.start];
-      this.currentPosition = this.start;
-  
-      while (!this.areSamePos(this.currentPosition, this.end) && this.possiblePositions.length !== 0) {
-        let delayres = await delay(20);
-        const positions:number[][] = this.filterPositions();
-
-        this.updatePath(this.bestPosFScore(positions));
-      }
-  
-      this.finalPath = this.findPath();
-  
-      this.isSolving = false;
-    }
-  }
-
-  bestPosFScore(positions:number[][]) {
-    return positions.reduce((chosenPoint, point) => {
-      const old_f = this.manhattanDistance(chosenPoint);
-      const new_f = this.manhattanDistance(point);
-
-      if (old_f > new_f) {
-        return point;
-      } else {
-        return chosenPoint;
-      }
-    });
-  }
-
-  
-  manhattanDistance(pos:number[]) {
-    // f = g + h
-
-    // lowest fscore is best path
-
-    return (
-      // gscore = distance between the current node and the start node
-      this.findPath(pos).length 
-      + 
-      // hscore = estimated distance from the current node to the end node.
-      (Math.abs(pos[0] - this.end[0]) + Math.abs(pos[1] - this.end[1]))
-    );
-  }
-  
-
-  updatePath(newPos:number[]) {
-    this.currentPosition = newPos;
-
-    const posInd = this.possiblePositions.findIndex(ele => this.areSamePos(ele, newPos));
-    
-    this.possiblePositions.splice(posInd, 1);
-
-    this.seen.push(newPos);
-  }
-
-  setDimensions(event:Event, dim:string) {
-    const target = event.target as HTMLTextAreaElement;
-    const value = parseInt(target.value);
-
-    if (dim === "width") {
-      this.width = value;
-    } else {
-      this.height = value;
-    }
-
-    this.createSquares();
-  }
-
   findNeighbors(point:number[]) {
     const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     const neighbors:number[][] = [];
@@ -235,6 +148,87 @@ export class MazeComponent implements OnInit {
     });
 
     return neighbors;
+  }
+
+  filterNeighbors() {
+    const adjacentSquares = this.findNeighbors(this.currentPosition);
+    
+    adjacentSquares.forEach(neighbor => {
+      if (!(this.isPresent(this.seen, neighbor) || this.isPresent(this.possiblePositions, neighbor))) {
+        this.possiblePositions.push(neighbor);
+        this.branchingPaths[this.calcInd(neighbor)] = this.currentPosition;
+      }
+    });
+  }
+
+  async solve() {
+    if (this.start.length === 2 && this.end.length === 2) {
+      this.isSolving = true;
+      this.clearPath();
+
+      this.currentPosition = this.start;
+      this.possiblePositions = [this.start];
+      this.seen = [this.start];
+  
+      while (this.possiblePositions.length !== 0 && !this.areSamePos(this.currentPosition, this.end)) {
+        let delayRes = await delay(20);
+
+        this.currentPosition = this.bestPosFScore(this.possiblePositions);
+
+        const posInd = this.possiblePositions.findIndex(ele => this.areSamePos(ele, this.currentPosition));
+        
+        this.possiblePositions.splice(posInd, 1);
+
+        this.seen.push(this.currentPosition);
+
+        this.filterNeighbors();
+      }
+  
+      this.finalPath = this.findPath();
+  
+      this.isSolving = false;
+    }
+  }
+
+  bestPosFScore(positions:number[][]) {
+    // pick the position with the best fScore
+    return positions.reduce((chosenPoint, point) => {
+      const oldFScore = this.manhattanDistance(chosenPoint);
+      const newFScore = this.manhattanDistance(point);
+
+      if (oldFScore > newFScore) {
+        return point;
+      } else {
+        return chosenPoint;
+      }
+    });
+  }
+
+  manhattanDistance(pos:number[]) {
+    // f = g + h
+
+    // lowest fscore is best path
+
+    return (
+      // gscore = distance between the current node and the start node
+      this.findPath(pos).length 
+      + 
+      // hscore = estimated distance from the current node to the end node.
+      (Math.abs(pos[0] - this.end[0]) + Math.abs(pos[1] - this.end[1]))
+    );
+  }
+
+  setDimensions(event:Event, dim:string) {
+    const target = event.target as HTMLTextAreaElement;
+    const value = parseInt(target.value);
+
+    if (dim === "width") {
+      this.width = value;
+    } else {
+      this.height = value;
+    }
+
+    this.createSquares();
   }
 
   findPath(goal = this.end) {
