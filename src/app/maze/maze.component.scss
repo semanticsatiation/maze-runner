@@ -14,6 +14,18 @@
     width: 17px;
     background: rgb(153, 153, 153);
     margin: 0.5px;
+
+    // prevent user from dragging any html elements in the maze
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+
+    /*
+        Introduced in IE 10.
+        See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+    */
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .square:hover {
@@ -36,6 +48,7 @@
 .start-tile {
     background: rgb(0, 197, 0);
 }
+
 .end-tile {
     background: rgb(0, 102, 255);
 }

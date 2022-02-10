@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TileKeyLegendsComponent } from './tile-key-legends.component';
+import { TileKeysComponent } from './tile-keys.component';
 
-describe('TileKeyLegendsComponent', () => {
-  let component: TileKeyLegendsComponent;
-  let fixture: ComponentFixture<TileKeyLegendsComponent>;
+describe('TileKeysComponent', () => {
+  let component: TileKeysComponent;
+  let fixture: ComponentFixture<TileKeysComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TileKeyLegendsComponent ]
+      declarations: [ TileKeysComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TileKeyLegendsComponent);
+    fixture = TestBed.createComponent(TileKeysComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

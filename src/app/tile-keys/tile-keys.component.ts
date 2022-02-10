@@ -1,12 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-tile-key-legends',
-  templateUrl: './tile-key-legends.component.html',
-  styleUrls: ['../maze/maze.component.scss', './tile-key-legends.component.scss']
+  selector: 'app-tile-keys',
+  templateUrl: './tile-keys.component.html',
+  styleUrls: ['../maze/maze.component.scss','./tile-keys.component.scss']
 })
 
-export class TileKeyLegendsComponent implements OnInit {
+export class TileKeysComponent implements OnInit {
 
   @Input() tileClass:string = "";
   @Input() description:string = "";
