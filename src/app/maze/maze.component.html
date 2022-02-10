@@ -7,23 +7,23 @@
 </div>
 
 <div class="maze-options">
-    <button (click)="clearMaze()">
+    <button [disabled]="isSolving" (click)="clearMaze()">
         clear maze
     </button>
 
-    <button (click)="clearPath()">
+    <button [disabled]="isSolving" (click)="clearPath()">
         clear path
     </button>
 
     <div>
         <label for="height">Height</label>
-        <input (change)="setHeight($event)" min="0" max="50" type="number" [value]="height">
+        <input [disabled]="isSolving" (change)="setDimensions($event, 'height')" min="0" max="50" type="number" [value]="height">
         <label for="width">Width</label>
-        <input (change)="setWidth($event)" min="0" max="50" type="number" [value]="width">
+        <input [disabled]="isSolving" (change)="setDimensions($event, 'width')" min="0" max="50" type="number" [value]="width">
     </div>
     
     
-    <button (click)="solve()">
+    <button [disabled]="isSolving" (click)="solve()">
         run maze
     </button>
 </div>
@@ -34,9 +34,9 @@
             (mouseover)="toggleTile([ri, ci])" 
             (mousedown)="mouseIsDown = true"
             (mouseup)="mouseIsDown = false"
-            (dblclick)="placeEnd([ri, ci])"
+            (dblclick)="placeGoal([ri, ci], 'end')"
             (click)="clickToggle([ri, ci])"
-            (contextmenu)="placeStart([ri, ci])"
+            (contextmenu)="placeGoal([ri, ci], 'start')"
             [ngClass]="[
                 true && 'square', 
                 isPositionPresent([ri, ci]) ? 'selected' : '', 

@@ -42,19 +42,21 @@ export class MazeComponent implements OnInit {
     [key: number]: number[]
   } = [];
 
+  isSolving:boolean = false;
+
   constructor() { }
 
-  // onComponentMount
   ngOnInit(): void {
 
   }
 
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
-  //   //Add '${implements OnChanges}' to the class.
-    
-  // }
-  
+  calcInd(arr:number[]) {
+    return (arr[0] * this.width) + arr[1];
+  }
+
+  areSamePos(arrOne:number[], arrTwo:number[]) {
+    return this.calcInd(arrOne) === this.calcInd(arrTwo);
+  }
 
   clickToggle(array:[number, number]) {
     this.clicked = true;
@@ -63,7 +65,8 @@ export class MazeComponent implements OnInit {
   }
 
   createSquares() {
-    this.clearPath()
+    this.clearMaze();
+
     return this.squares = [...Array(this.height)].map((item, ind) => (
       [...Array(this.width)].map((item, ind) => (
         0
@@ -72,11 +75,11 @@ export class MazeComponent implements OnInit {
   }
 
   toggleTile(array:[number, number]) {
-    if ((this.mouseIsDown || this.clicked) && this.calcInd(array) !== this.calcInd(this.start) && this.calcInd(array) != this.calcInd(this.end)) {
+    if (!this.isSolving && (this.mouseIsDown || this.clicked) && !this.areSamePos(array, this.start) && !this.areSamePos(array, this.end)) {
       const newArr = [...this.selected];
 
       if (this.isPresent(newArr, array)) {
-        const eleIndex = newArr.findIndex(i => this.calcInd(i) === this.calcInd(array));
+        const eleIndex = newArr.findIndex(ele => this.areSamePos(ele, array));
 
         if (eleIndex !== -1) {
           newArr.splice(eleIndex, 1);
@@ -92,17 +95,13 @@ export class MazeComponent implements OnInit {
 
     this.clicked = false;
   }
-  
-  calcInd(arr:number[]) {
-    return (arr[0] * this.width) + arr[1];
-  }
 
   isPositionPresent(target:number[]) {
     return this.isPresent(this.selected, target);
   }
 
   isPresent(array:number[][], target:number[]) {
-    return array.find(ele => this.calcInd(ele) === this.calcInd(target)) !== undefined;
+    return array.find(ele => this.areSamePos(ele, target)) !== undefined;
   }
 
   clearMaze() {
@@ -120,25 +119,20 @@ export class MazeComponent implements OnInit {
     this.branchingPaths = {};
     this.currentPosition = this.start;
   }
-  
 
-  placeStart(array:[number, number]) {
-    if (!this.isPositionPresent(array) && this.calcInd(this.end) !== this.calcInd(array)) {
-      if (this.calcInd(this.start) === this.calcInd(array)) {
-        this.start = [-1, -1];
-      } else {
-        this.start = array;
-      }
-    }
-  }
+  placeGoal(array:number[], goal:string) {
+    const isStart:boolean = goal === "start";
+    const getGoal = (isStartPos:boolean) =>  isStartPos ? this.start : this.end;
+    const setGoal = (goal:number[]) => isStart ? this.start = goal : this.end = goal;
 
-  placeEnd(array:[number, number]) {
-    if (!this.isPositionPresent(array) && this.calcInd(this.start) !== this.calcInd(array)) {
-      if (this.calcInd(this.end) === this.calcInd(array)) {
-        this.end = [-1, -1];
+    if (!this.isSolving && !this.isPositionPresent(array) && !this.areSamePos(getGoal(!isStart), array)) {
+      if (this.areSamePos(getGoal(isStart), array)) {
+        setGoal([]);
       } else {
-        this.end = array;
+        setGoal(array);
       }
+
+      this.clearPath(); 
     }
   }
 
@@ -156,17 +150,24 @@ export class MazeComponent implements OnInit {
   }
 
   async solve() {
-    this.clearPath();
-    this.possiblePositions = [this.start];
-    this.currentPosition = this.start;
+    if (this.start.length === 2 && this.end.length === 2) {
+      this.isSolving = true;
 
-    while (this.calcInd(this.currentPosition) !== this.calcInd(this.end) && this.possiblePositions.length !== 0) {
-      let delayres = await delay(20);
-      const positions:number[][] = this.filterPositions();
-      this.updatePath(this.bestPosFScore(positions));
+      this.clearPath();
+      this.possiblePositions = [this.start];
+      this.currentPosition = this.start;
+  
+      while (!this.areSamePos(this.currentPosition, this.end) && this.possiblePositions.length !== 0) {
+        let delayres = await delay(20);
+        const positions:number[][] = this.filterPositions();
+
+        this.updatePath(this.bestPosFScore(positions));
+      }
+  
+      this.finalPath = this.findPath();
+  
+      this.isSolving = false;
     }
-
-    this.finalPath = this.findPath();
   }
 
   bestPosFScore(positions:number[][]) {
@@ -201,23 +202,23 @@ export class MazeComponent implements OnInit {
   updatePath(newPos:number[]) {
     this.currentPosition = newPos;
 
-    const posInd = this.possiblePositions.findIndex(ele => this.calcInd(ele) === this.calcInd(newPos));
+    const posInd = this.possiblePositions.findIndex(ele => this.areSamePos(ele, newPos));
     
     this.possiblePositions.splice(posInd, 1);
 
     this.seen.push(newPos);
   }
 
-  setWidth(event: Event) {
+  setDimensions(event:Event, dim:string) {
     const target = event.target as HTMLTextAreaElement;
-    this.width = parseInt(target.value);
-    this.createSquares();
-  }
+    const value = parseInt(target.value);
 
-  setHeight(event: Event) {
-    const target = event.target as HTMLTextAreaElement;
-    
-    this.height = parseInt(target.value);
+    if (dim === "width") {
+      this.width = value;
+    } else {
+      this.height = value;
+    }
+
     this.createSquares();
   }
 
