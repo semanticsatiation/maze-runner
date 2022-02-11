@@ -11,7 +11,7 @@ export class TileKeysComponent implements OnInit {
   @Input() tileClass:string = "";
   @Input() description:string = "";
 
-  keys = [["start-tile", "Start"], ["end-tile", "End"], ["wall", "Walls"], ["seen-tile", "Seen Tiles"], ["final-tile", "Shortest Path"]];
+  keys = [["start-tile", "Right Click = Start"], ["end-tile", "Double Click = End"], ["wall", "Single Click/Hold = Walls"], ["seen-tile", "Seen Tiles"], ["final-tile", "Shortest Path"]];
 
   constructor() { 
   }
