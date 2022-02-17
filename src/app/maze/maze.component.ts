@@ -47,7 +47,6 @@ export class MazeComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-
   }
 
   calcInd(arr:number[]) {
