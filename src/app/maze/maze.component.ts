@@ -18,6 +18,8 @@ export class MazeComponent implements OnInit {
   height:number = 15;
   width:number = 15;
 
+  speed:number = 20;
+
   squares:number[][] = this.createSquares();
 
   start:number[] = [];
@@ -37,6 +39,8 @@ export class MazeComponent implements OnInit {
   mouseIsDown = false;
 
   clicked = false;
+
+  speeds:any[] = [["Slow", "50"], ["Normal", "20"], ["Fast", "3"], ["Instant", "0"]]; 
 
   branchingPaths: {
     [key: number]: number[]
@@ -69,6 +73,17 @@ export class MazeComponent implements OnInit {
     return this.squares = [...Array(this.height)].map((item, ind) => (
       [...Array(this.width)].map((item, ind) => 0)
     ));
+  }
+
+  adjustSpeed(event:Event) {
+    if (!this.isSolving) {
+      const target = event.target as HTMLTextAreaElement;
+  
+      console.log(target.value);
+      
+  
+      this.speed = parseInt(target.value);
+    }
   }
 
   toggleTile(array:[number, number]) {
@@ -163,16 +178,19 @@ export class MazeComponent implements OnInit {
   }
 
   async solve() {
-    if (this.start.length === 2 && this.end.length === 2) {
-      this.isSolving = true;
+    if (this.start.length === 2 && this.end.length === 2 && !this.isSolving) {
       this.clearPath();
 
+      this.isSolving = true;
       this.currentPosition = this.start;
       this.possiblePositions = [this.start];
       this.seen = [this.start];
   
       while (this.possiblePositions.length !== 0 && !this.areSamePos(this.currentPosition, this.end)) {
-        let delayRes = await delay(20);
+
+        if (this.speed !== 0) {
+          let delayRes = await delay(this.speed);
+        }
 
         this.currentPosition = this.bestPosFScore(this.possiblePositions);
 
@@ -186,7 +204,7 @@ export class MazeComponent implements OnInit {
       }
   
       this.finalPath = this.findPath();
-  
+      
       this.isSolving = false;
     }
   }
@@ -220,28 +238,30 @@ export class MazeComponent implements OnInit {
   }
 
   setDimensions(option:{event:Event | undefined, number:number | undefined}, dim:string) {
-    let value:number;
+    if (!this.isSolving) {
+      let value:number;
 
-    if (option["event"] !== undefined) {
-      const target = option["event"].target as HTMLTextAreaElement;
-      value = parseInt(target.value);
-    } else {
-      value = option["number"] || 0;
+      if (option["event"] !== undefined) {
+        const target = option["event"].target as HTMLTextAreaElement;
+        value = parseInt(target.value);
+      } else {
+        value = option["number"] || 0;
+      }
+  
+      if (dim === "width" && !(value > 2 && value < 100)) {
+        value = 3;
+      } else if (dim === "height" && !(value > 0 && value < 100)) {
+        value = 1;
+      }
+  
+      if (dim === "width") {
+        this.width = value;
+      } else if (dim === "height") {
+        this.height = value;
+      }
+  
+      this.createSquares();
     }
-
-    if (dim === "width" && !(value > 2 && value < 100)) {
-      value = 3;
-    } else if (dim === "height" && !(value > 0 && value < 100)) {
-      value = 1;
-    }
-
-    if (dim === "width") {
-      this.width = value;
-    } else if (dim === "height") {
-      this.height = value;
-    }
-
-    this.createSquares();
   }
 
   findPath(goal = this.end) {

@@ -14,6 +14,10 @@
         <button type="button" class="btn btn-success" [disabled]="isSolving" (click)="solve()">
             run maze
         </button>
+
+        <select [disabled]="isSolving" name="speed" id="speed" [value]="speed" (change)="adjustSpeed($event)">
+            <option *ngFor="let speedItem of speeds; let i = index;" [selected]="speedItem[1] === speed.toString()" [value]="speeds[i][1]">{{speedItem[0]}}</option>
+        </select>
     </div>
 
     <!-- <div>
@@ -30,13 +34,13 @@
 
             <div>
                 <span>
-                    <button class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: height - 1}, 'height')" type="button">
+                    <button [disabled]="isSolving" class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: height - 1}, 'height')" type="button">
                         -
                     </button>
                 </span>
                 <input id="height" name="height" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'height')" [disabled]="isSolving" type="text" [value]="height">
                 <span>
-                    <button class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: height + 1}, 'height')" type="button">
+                    <button [disabled]="isSolving" class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: height + 1}, 'height')" type="button">
                         +
                     </button>
                 </span>
@@ -48,13 +52,13 @@
 
             <div>
                 <span>
-                    <button class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: width - 1}, 'width')" type="button">
+                    <button [disabled]="isSolving" class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: width - 1}, 'width')" type="button">
                         -
                     </button>
                 </span>
                 <input id="width" name="width" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'width')" [disabled]="isSolving" type="text" [value]="width">
                 <span>
-                    <button class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: width + 1}, 'width')" type="button">
+                    <button [disabled]="isSolving" class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: width + 1}, 'width')" type="button">
                         +
                     </button>
                 </span>
