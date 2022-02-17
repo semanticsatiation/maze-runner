@@ -68,9 +68,7 @@ export class MazeComponent implements OnInit {
     this.clearMaze();
 
     return this.squares = [...Array(this.height)].map((item, ind) => (
-      [...Array(this.width)].map((item, ind) => (
-        0
-      ))
+      [...Array(this.width)].map((item, ind) => 0)
     ));
   }
 
@@ -105,18 +103,22 @@ export class MazeComponent implements OnInit {
   }
 
   clearMaze() {
-    this.selected = [];
-    this.start = [];
-    this.end = [];
-
-    this.clearPath();
+    if (!this.isSolving) {
+      this.selected = [];
+      this.start = [];
+      this.end = [];
+  
+      this.clearPath();
+    }
   }
 
   clearPath() {
-    this.seen = [];
-    this.finalPath = [];
-    this.possiblePositions = [];
-    this.branchingPaths = {};
+    if (!this.isSolving) {
+      this.seen = [];
+      this.finalPath = [];
+      this.possiblePositions = [];
+      this.branchingPaths = {};
+    }
   }
 
   placeGoal(array:number[], goal:string) {
@@ -218,13 +220,25 @@ export class MazeComponent implements OnInit {
     );
   }
 
-  setDimensions(event:Event, dim:string) {
-    const target = event.target as HTMLTextAreaElement;
-    const value = parseInt(target.value);
+  setDimensions(option:{event:Event | undefined, number:number | undefined}, dim:string) {
+    let value:number;
+
+    if (option["event"] !== undefined) {
+      const target = option["event"].target as HTMLTextAreaElement;
+      value = parseInt(target.value);
+    } else {
+      value = option["number"] || 0;
+    }
+
+    if (dim === "width" && !(value > 2 && value < 100)) {
+      value = 3;
+    } else if (dim === "height" && !(value > 0 && value < 100)) {
+      value = 1;
+    }
 
     if (dim === "width") {
       this.width = value;
-    } else {
+    } else if (dim === "height") {
       this.height = value;
     }
 

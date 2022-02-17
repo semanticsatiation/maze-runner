@@ -3,10 +3,12 @@
     flex-wrap: wrap;
     justify-content: space-around;
     align-items: center;
+    margin: 0;
 }
 
 .key-item {
     display: flex;
+    align-items: center;
     padding: 5px;
 }
 

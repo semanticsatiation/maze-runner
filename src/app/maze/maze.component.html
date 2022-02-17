@@ -1,45 +1,89 @@
 <app-tile-keys></app-tile-keys>
 
 <div class="maze-options">
-    <button [disabled]="isSolving" (click)="clearMaze()">
-        clear maze
-    </button>
 
-    <button [disabled]="isSolving" (click)="clearPath()">
-        clear path
-    </button>
-
-    <div>
-        <label for="height">Height</label>
-        <input [disabled]="isSolving" (change)="setDimensions($event, 'height')" min="0" max="50" type="number" [value]="height">
-        <label for="width">Width</label>
-        <input [disabled]="isSolving" (change)="setDimensions($event, 'width')" min="0" max="50" type="number" [value]="width">
+    <div class="sub-maze">
+        <a class="link-light" href="#" (click)="clearMaze()">
+            clear maze
+        </a>
+    
+        <a class="link-light" href="#" (click)="clearPath()">
+            clear path
+        </a>
+        
+        <button type="button" class="btn btn-success" [disabled]="isSolving" (click)="solve()">
+            run maze
+        </button>
     </div>
-    
-    
-    <button [disabled]="isSolving" (click)="solve()">
-        run maze
-    </button>
-</div>
-<ul class="maze" (contextmenu)="$event.preventDefault()">
-    <li class="row" *ngFor="let square of squares; let ri = index;">
-        <div 
-            *ngFor="let block of square; let ci = index;"
-            (mouseover)="toggleTile([ri, ci])" 
-            (mousedown)="mouseIsDown = true"
-            (mouseup)="mouseIsDown = false"
-            (dblclick)="placeGoal([ri, ci], 'end')"
-            (click)="clickToggle([ri, ci])"
-            (contextmenu)="placeGoal([ri, ci], 'start')"
-            [ngClass]="[
-                true && 'square', 
-                isPositionPresent([ri, ci]) ? 'wall' : '', 
-                calcInd(start) === calcInd([ri, ci]) ? 'start-tile' : '', 
-                calcInd(end) === calcInd([ri, ci]) ? 'end-tile' : '',
-                !isPresent(finalPath, [ri, ci]) && calcInd(start) !== calcInd([ri, ci]) && isPresent(seen, [ri, ci]) ? 'seen-tile' : '',
-                isPresent(finalPath, [ri, ci]) ? 'final-tile' : ''
-            ]"
-        >
+
+    <!-- <div>
+        <label for="height">Height</label>
+        <input [disabled]="isSolving" (change)="setDimensions($event, 'height')" min="1" max="50" type="number" [value]="height">
+        <label for="width">Width</label>
+        <input [disabled]="isSolving" (change)="setDimensions($event, 'width')" min="2" max="50" type="number" [value]="width">
+    </div> -->
+
+
+    <div class="buttons-container">
+        <div class="button-container">
+            <label for="height">Height</label>
+
+            <div>
+                <span>
+                    <button class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: height - 1}, 'height')" type="button">
+                        -
+                    </button>
+                </span>
+                <input id="height" name="height" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'height')" [disabled]="isSolving" type="text" [value]="height">
+                <span>
+                    <button class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: height + 1}, 'height')" type="button">
+                        +
+                    </button>
+                </span>
+            </div>
         </div>
-    </li>
-</ul>
+
+        <div class="button-container">
+            <label for="width">Width</label>
+
+            <div>
+                <span>
+                    <button class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: width - 1}, 'width')" type="button">
+                        -
+                    </button>
+                </span>
+                <input id="width" name="width" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'width')" [disabled]="isSolving" type="text" [value]="width">
+                <span>
+                    <button class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: width + 1}, 'width')" type="button">
+                        +
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="maze-container">
+    <ul class="maze" (contextmenu)="$event.preventDefault()">
+        <li class="row" *ngFor="let square of squares; let ri = index;">
+            <div 
+                *ngFor="let block of square; let ci = index;"
+                (mouseover)="toggleTile([ri, ci])" 
+                (mousedown)="mouseIsDown = true"
+                (mouseup)="mouseIsDown = false"
+                (dblclick)="placeGoal([ri, ci], 'end')"
+                (click)="clickToggle([ri, ci])"
+                (contextmenu)="placeGoal([ri, ci], 'start')"
+                [ngClass]="[
+                    true && 'square', 
+                    isPositionPresent([ri, ci]) ? 'wall' : '', 
+                    calcInd(start) === calcInd([ri, ci]) ? 'start-tile' : '', 
+                    calcInd(end) === calcInd([ri, ci]) ? 'end-tile' : '',
+                    !isPresent(finalPath, [ri, ci]) && calcInd(start) !== calcInd([ri, ci]) && isPresent(seen, [ri, ci]) ? 'seen-tile' : '',
+                    isPresent(finalPath, [ri, ci]) ? 'final-tile' : ''
+                ]"
+            >
+            </div>
+        </li>
+    </ul>
+</div>

@@ -1,12 +1,17 @@
-.maze {
+.maze-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
+    overflow: scroll;
+    margin: 5px;
+}
+
+.maze {
+    margin: auto;
 }
 
 .row {
     display: flex;
+    flex-wrap: nowrap;
 }
 
 .square {
@@ -32,10 +37,63 @@
     filter: brightness(60%);
 }
 
+.clear-options a:last-child {
+    margin-left: 7px;
+}
+
 .maze-options {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    background: #222221;
+    padding: 10px;
+    border-radius: 10px;
+
+    a {
+        text-decoration: none;
+    }
+
+    > div {
+        display: flex;
+        justify-content: space-around;
+    }
 }
+
+.sub-maze {
+    align-items: center;
+    width: 61%;
+}
+
+.buttons-container {
+    min-width: 300px;
+    max-width: 300px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    > div {
+        display: flex;
+    }
+
+    input {
+        width: 50px;
+        text-align: center;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 .wall {
     background: rgba(255, 52, 52, 0.781);
@@ -55,4 +113,8 @@
 
 .seen-tile {
     background: yellow;
+}
+
+.link-light:hover {
+    filter: brightness(70%);
 }
