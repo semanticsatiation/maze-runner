@@ -79,9 +79,6 @@ export class MazeComponent implements OnInit {
     if (!this.isSolving) {
       const target = event.target as HTMLTextAreaElement;
   
-      console.log(target.value);
-      
-  
       this.speed = parseInt(target.value);
     }
   }
