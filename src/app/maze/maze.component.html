@@ -15,21 +15,18 @@
             run maze
         </button>
 
-        <select [disabled]="isSolving" name="speed" id="speed" [value]="speed" (change)="adjustSpeed($event)">
-            <option *ngFor="let speedItem of speeds; let i = index;" [selected]="speedItem[1] === speed.toString()" [value]="speeds[i][1]">{{speedItem[0]}}</option>
-        </select>
+
+        <div class="flex-column-center">
+            <label for="speed">Speed</label>
+
+            <select [disabled]="isSolving" name="speed" id="speed" [value]="speed" (change)="adjustSpeed($event)">
+                <option *ngFor="let speedItem of speeds; let i = index;" [selected]="speedItem[1] === speed.toString()" [value]="speeds[i][1]">{{speedItem[0]}}</option>
+            </select>
+        </div>
     </div>
 
-    <!-- <div>
-        <label for="height">Height</label>
-        <input [disabled]="isSolving" (change)="setDimensions($event, 'height')" min="1" max="50" type="number" [value]="height">
-        <label for="width">Width</label>
-        <input [disabled]="isSolving" (change)="setDimensions($event, 'width')" min="2" max="50" type="number" [value]="width">
-    </div> -->
-
-
     <div class="buttons-container">
-        <div class="button-container">
+        <div class="button-container flex-column-center">
             <label for="height">Height</label>
 
             <div>
@@ -47,7 +44,7 @@
             </div>
         </div>
 
-        <div class="button-container">
+        <div class="button-container flex-column-center">
             <label for="width">Width</label>
 
             <div>

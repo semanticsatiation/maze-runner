@@ -40,7 +40,7 @@ export class MazeComponent implements OnInit {
 
   clicked = false;
 
-  speeds:any[] = [["Slow", "150"], ["Normal", "20"], ["Fast", "3"], ["Instant", "0"]]; 
+  speeds:any[] = [["Slow", "150"], ["Normal", "20"], ["Fast", "1"], ["Instant", "0"]]; 
 
   branchingPaths: {
     [key: number]: number[]
