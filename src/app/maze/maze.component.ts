@@ -16,9 +16,8 @@ const delay = (delayInms:number) => {
 
 export class MazeComponent implements OnInit {
   height:number = 15;
-  width:number = 15;
 
-  speed:number = 20;
+  width:number = 15;
 
   squares:number[][] = this.createSquares();
 
@@ -40,7 +39,13 @@ export class MazeComponent implements OnInit {
 
   clicked = false;
 
-  speeds:any[] = [["Slow", "150"], ["Normal", "20"], ["Fast", "1"], ["Instant", "0"]]; 
+  speed:number = 20;
+
+  speeds:any[] = [["Slow", "150"], ["Normal", "20"], ["Fast", "1"], ["Instant", "0"]];
+
+  zoom:number = 100;  
+
+  zooms:number[] = [200, 150, 125, 100, 50, 25]; 
 
   branchingPaths: {
     [key: number]: number[]
@@ -51,6 +56,16 @@ export class MazeComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  calcZoom() {
+    return ((this.zoom / 100) * 17) + "px";
+  }
+
+  adjustZoom(event:Event) {
+    const target = event.target as HTMLTextAreaElement;
+
+    this.zoom = parseInt(target.value);
   }
 
   calcInd(arr:number[]) {

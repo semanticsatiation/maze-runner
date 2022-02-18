@@ -23,6 +23,14 @@
                 <option *ngFor="let speedItem of speeds; let i = index;" [selected]="speedItem[1] === speed.toString()" [value]="speeds[i][1]">{{speedItem[0]}}</option>
             </select>
         </div>
+
+        <div class="flex-column-center">
+            <label for="zoom">Zoom</label>
+
+            <select name="zoom" id="zoom" [value]="zoom" (change)="adjustZoom($event)">
+                <option *ngFor="let zoomItem of zooms; let i = index;" [selected]="zoomItem === zoom" [value]="zooms[i]">{{zoomItem}}%</option>
+            </select>
+        </div>
     </div>
 
     <div class="buttons-container">
@@ -67,7 +75,8 @@
 <div class="maze-container">
     <ul class="maze" (contextmenu)="$event.preventDefault()">
         <li class="row" *ngFor="let square of squares; let ri = index;">
-            <div 
+            <div
+                [ngStyle]="{height: calcZoom(), width: calcZoom()}"
                 *ngFor="let block of square; let ci = index;"
                 (mouseover)="toggleTile([ri, ci])" 
                 (mousedown)="mouseIsDown = true"
