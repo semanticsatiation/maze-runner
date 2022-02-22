@@ -42,8 +42,6 @@
 }
 
 .maze-options {
-    display: flex;
-    justify-content: space-between;
     background: #222221;
     padding: 10px;
     border-radius: 10px;
@@ -56,16 +54,20 @@
         display: flex;
         justify-content: space-around;
     }
+}
 
-    .sub-maze {
-        align-items: center;
-        width: 100%;
-    }
+.modify-maze-options {
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
 }
 
 .buttons-container {
-    min-width: 300px;
-    max-width: 300px;
+    display: flex;
+    justify-content: 
+    center;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .button-container {
@@ -77,6 +79,10 @@
         width: 50px;
         text-align: center;
     }
+}
+
+.run-maze-button {
+    margin-top: 5px;
 }
 
 
@@ -119,4 +125,11 @@
 
 .link-light:hover {
     filter: brightness(70%);
+}
+
+
+@media all and (min-width: 288px) {
+    .button-container:first-child {
+        margin-right: 10px;
+    }
 }
