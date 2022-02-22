@@ -15,9 +15,9 @@ const delay = (delayInms:number) => {
 })
 
 export class MazeComponent implements OnInit {
-  height:number = 13;
+  height:number = 10;
 
-  width:number = 28;
+  width:number = 10;
 
   algorithm:string = "A*";
 
@@ -25,9 +25,9 @@ export class MazeComponent implements OnInit {
 
   squares:number[][] = this.createSquares();
 
-  start:number[] = [6, 14];
+  start:number[] = [];
 
-  end:number[] = [12, 27];
+  end:number[] = [];
 
   selected:number[][] = [];
 

@@ -30,7 +30,7 @@
         <div class="flex-column-center">
             <label for="algorithm">Algorithm</label>
 
-            <select name="algorithm" id="algorithm" [value]="algorithm" (change)="setAlgorithm($event)">
+            <select name="algorithm" id="algorithm" [value]="algorithm" (change)="setAlgorithm($event)" [disabled]="isSolving">
                 <option *ngFor="let algorithmItem of algorithms; let i = index;" [selected]="algorithmItem === algorithm" [value]="algorithms[i]">{{algorithmItem}}</option>
             </select>
         </div>
