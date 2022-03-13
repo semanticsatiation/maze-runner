@@ -83,14 +83,21 @@
             </div>
         </div>
     </div>
-    <button type="button" class="btn btn-success run-maze-button" [disabled]="isSolving" (click)="solve()">
-        run maze
+
+
+    <button *ngIf="isSolving else elseTemplate" type="button" class="btn btn-danger run-maze-button" (click)="isSolving = false;">
+        stop maze
     </button>
+    <ng-template #elseTemplate>
+        <button type="button" class="btn btn-success run-maze-button" (click)="solve()">
+            run maze
+        </button>
+    </ng-template>
 </div>
 
 <div class="maze-stats">
     <span>Time Taken: <span class="stat">{{timeTaken}}</span> milliseconds</span>
-    <span>Steps Taken: <span class="stat">{{totalSteps}}</span></span>
+    <span>Steps Taken (with weights): <span class="stat">{{totalSteps}}</span></span>
     <span>Total Final Path: <span class="stat">{{finalTotal}}</span></span>
     <span>Total Tiles Seen: <span class="stat">{{seenTotal}}/{{(width * height) - wallsTotal}}</span>  (<span class="stat">{{((seenTotal / ((width * height) - wallsTotal)) * 100).toFixed(2)}}%</span>)</span>
 </div>

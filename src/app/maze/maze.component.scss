@@ -86,7 +86,6 @@
     margin-top: 5px;
 }
 
-
 .flex-column-center {
     display: flex;
     flex-direction: column;
@@ -95,6 +94,10 @@
 
 .tile-radios > label:first-of-type {
     margin-right: 5px;
+}
+
+.tile-radios > label {
+    margin-left: 3px;
 }
 
 

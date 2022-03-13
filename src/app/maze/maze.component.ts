@@ -1,4 +1,6 @@
+import { ThisReceiver } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
+import { resetFakeAsyncZone } from '@angular/core/testing';
 
 const delay = (delayInms:number) => {
   return new Promise(resolve => {
@@ -179,6 +181,9 @@ export class MazeComponent implements OnInit {
 
       this.start = [];
       this.end = [];
+
+      // walls will always be reset when the maze is cleared
+      this.wallsTotal = 0;
   
       this.clearPath();
     }
@@ -321,18 +326,19 @@ export class MazeComponent implements OnInit {
   }
 
   async solve() {
-    if (this.start.length === 2 && this.end.length === 2 && !this.isSolving) {
+    if (this.start.length === 2 && this.end.length === 2) {
+      this.clearPath();
+      this.isSolving = true;
+
       const performance = window.performance;
 
-      const startTime = performance.now()
-
-      this.clearPath();
-
-      this.seenTotal += 1;
+      const startTime = performance.now();
 
       const current = this.getStart();
 
-      this.isSolving = true;
+      // this is to take the start into account since it is never actaully seen
+      this.seenTotal += 1;
+
       this.currentNode = current;
       this.openList = [current];
 
@@ -340,11 +346,7 @@ export class MazeComponent implements OnInit {
       this.currentNode.f = 0;
       this.currentNode.g = 0;
   
-      while (this.openList.length !== 0 && !this.areSamePos(this.currentNode, {pos: this.end})) {
-        if (this.speed !== 0) {
-          let delayRes = await delay(this.speed);
-        }
-
+      while (this.openList.length !== 0 && !this.areSamePos(this.currentNode, {pos: this.end}) && this.isSolving) {
         if (!["Breadth First Search"].includes(this.algorithm)) {
           if (this.algorithm === "A*") {
             // a* algorithm (informed) f(n) = g(n) + h(n)
@@ -364,26 +366,36 @@ export class MazeComponent implements OnInit {
 
         this.currentNode.closed = true;
         this.filterNeighbors();
-      }
-      
-      this.timeTaken = Math.trunc(performance.now() - startTime);
 
-      let currentNode = this.getEnd();
-
-  
-      while (currentNode.parent !== undefined) {
-        let delayRes = await delay(10);
-        currentNode = currentNode.parent;
-        currentNode.final = true;
-        
-        this.finalTotal += 1;
-
-        if (currentNode.weight) {
-          this.totalSteps = this.totalSteps + 21;
-        } else {
-          this.totalSteps += 1;
+        if (this.speed !== 0) {
+          let delayRes = await delay(this.speed);
         }
       }
+
+      if (this.isSolving) {
+        this.timeTaken = Math.trunc(performance.now() - startTime);
+
+        let currentNode = this.getEnd();
+  
+    
+        while (currentNode.parent !== undefined && this.isSolving) {
+          currentNode = currentNode.parent;
+          currentNode.final = true;
+          
+          this.finalTotal += 1;
+  
+          if (currentNode.weight) {
+            this.totalSteps = this.totalSteps + 21;
+          } else {
+            this.totalSteps += 1;
+          }
+          let delayRes = await delay(10);
+        }
+      }
+
+      // this will only execute if this.isSolving is already false
+      // meaning the user ended the maze solving themselves 
+      this.clearPath();
 
       this.isSolving = false;    
     }
