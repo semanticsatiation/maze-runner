@@ -1,8 +1,9 @@
-.maze-container {
+.grid-container {
     display: flex;
     flex-direction: column;
-    overflow: auto;
     margin: 5px;
+    height: 100%;
+    overflow: auto;
 }
 
 .maze {
@@ -92,16 +93,17 @@
     align-items: center;
 }
 
+.tile-radios > label:first-of-type {
+    margin-right: 5px;
+}
 
 
 
 
 
-
-
-
-
-
+.weight {
+    border: 2px solid rgb(147, 35, 240);
+}
 
 .wall {
     background: rgba(255, 52, 52, 0.781);
@@ -115,16 +117,36 @@
     background: rgb(0, 197, 0);
 }
 
-.end-tile {
-    background: rgb(0, 102, 255);
-}
-
 .seen-tile {
     background: yellow;
 }
 
+.current-tile {
+    background: rgb(255, 0, 255);
+}
+
+.end-tile {
+    background: rgb(0, 102, 255);
+}
+
 .link-light:hover {
     filter: brightness(70%);
+}
+
+.stat {
+    color: rgb(0, 197, 0);;
+}
+
+.maze-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+
+    > span:not(:last-child) {
+        margin-right: 10px;
+    }
 }
 
 

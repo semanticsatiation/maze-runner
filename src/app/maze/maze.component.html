@@ -28,6 +28,16 @@
         </div>
 
         <div class="flex-column-center">
+            <span>Tile Type</span>
+            <div class="tile-radios">
+                <input type="radio" [checked]="currentTileType === 'walls'" (change)="changeTileType($event)" value="walls" name="walls" id="walls">
+                <label for="walls">Walls</label>
+                <input type="radio" [checked]="currentTileType === 'weights'" (change)="changeTileType($event)" value="weights" name="weights" id="weights">
+                <label for="weights">Weights (cost of 20)</label>
+            </div>
+        </div>
+
+        <div class="flex-column-center">
             <label for="algorithm">Algorithm</label>
 
             <select name="algorithm" id="algorithm" [value]="algorithm" (change)="setAlgorithm($event)" [disabled]="isSolving">
@@ -78,25 +88,37 @@
     </button>
 </div>
 
-<div class="maze-container">
+<div class="maze-stats">
+    <span>Time Taken: <span class="stat">{{timeTaken}}</span> milliseconds</span>
+    <span>Steps Taken: <span class="stat">{{totalSteps}}</span></span>
+    <span>Total Final Path: <span class="stat">{{finalTotal}}</span></span>
+    <span>Total Tiles Seen: <span class="stat">{{seenTotal}}/{{(width * height) - wallsTotal}}</span>  (<span class="stat">{{((seenTotal / ((width * height) - wallsTotal)) * 100).toFixed(2)}}%</span>)</span>
+</div>
+
+<div class="grid-container">
     <ul class="maze" (contextmenu)="$event.preventDefault()">
-        <li class="row" *ngFor="let square of squares; let ri = index;">
+        <li class="row" *ngFor="let row of squares; let ri = index;">
             <div
                 [ngStyle]="{height: calcZoom(), width: calcZoom()}"
-                *ngFor="let block of square; let ci = index;"
-                (mouseover)="toggleTile([ri, ci])" 
-                (mousedown)="mouseIsDown = true"
+                *ngFor="let block of row; let ci = index;"
+
+                (mouseover)="toggleTile(block)" 
+                (mousedown)="mouseIsDown = true;"
                 (mouseup)="mouseIsDown = false"
-                (dblclick)="placeGoal([ri, ci], 'end')"
-                (click)="clickToggle([ri, ci])"
-                (contextmenu)="placeGoal([ri, ci], 'start')"
+                (dblclick)="placeGoal(block, 'end')"
+                (click)="clickToggle(block)"
+                (contextmenu)="placeGoal(block, 'start')"
+
+
                 [ngClass]="[
                     true && 'square', 
-                    isPositionPresent([ri, ci]) ? 'wall' : '', 
-                    calcInd(start) === calcInd([ri, ci]) ? 'start-tile' : '', 
-                    calcInd(end) === calcInd([ri, ci]) ? 'end-tile' : '',
-                    !isPresent(finalPath, [ri, ci]) && calcInd(start) !== calcInd([ri, ci]) && isPresent(seen, [ri, ci]) ? 'seen-tile' : '',
-                    isPresent(finalPath, [ri, ci]) ? 'final-tile' : ''
+                    areSamePos(currentNode, block) ? 'current-tile' : '',
+                    block.weight ? 'weight' : '',
+                    block.wall ? 'wall' : '',
+                    areSamePos(getStart(), block) ? 'start-tile' : '', 
+                    areSamePos(getEnd(), block) ? 'end-tile' : '',
+                    !block.final && !areSamePos(getStart(), block) && block.seen ? 'seen-tile' : '',
+                    block.final ? 'final-tile' : '',
                 ]"
             >
             </div>
