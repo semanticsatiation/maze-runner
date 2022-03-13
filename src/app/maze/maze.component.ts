@@ -45,9 +45,9 @@ interface MiniNodeObj {
 })
 
 export class MazeComponent implements OnInit {
-  height:number = 20;
+  height:number = 10;
 
-  width:number = 20;
+  width:number = 10;
 
   algorithm:string = "A*";
 
