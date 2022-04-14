@@ -68,9 +68,6 @@ export class GridComponent implements OnInit, OnChanges {
   constructor() { }
 
   ngOnInit(): void {
-    if (!this.universal) {
-      this.createSquares();
-    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {

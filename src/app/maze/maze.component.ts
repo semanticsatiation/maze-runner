@@ -67,6 +67,7 @@ export class MazeComponent implements OnInit {
 
   ngOnInit(): void {
     this.createSquares();
+    
   }
 
   solve() {
@@ -149,7 +150,7 @@ export class MazeComponent implements OnInit {
         this.start = [];
         this.end = [];
         this.clearPath();
-      } else {
+      } else if (this.children !== undefined) {
         this.children.forEach((comp) => comp.clearMaze());
       }
     }
