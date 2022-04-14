@@ -6,7 +6,7 @@
             clear maze
         </a>
     
-        <a class="link-light" href="#" (click)="clearPath()">
+        <a class="link-light" href="#" (click)="clearPath();">
             clear path
         </a>
 
@@ -38,11 +38,13 @@
         </div>
 
         <div class="flex-column-center">
-            <label for="algorithm">Algorithm</label>
+            <label for="diagonal">Diagonal</label>
+            <input [disabled]="isSolving" type="checkbox" name="diagonal" id="diagonal" [checked]="diagonal"[value]="diagonal" (change)="toggleDiagonal()">
+        </div>
 
-            <select name="algorithm" id="algorithm" [value]="algorithm" (change)="setAlgorithm($event)" [disabled]="isSolving">
-                <option *ngFor="let algorithmItem of algorithms; let i = index;" [selected]="algorithmItem === algorithm" [value]="algorithms[i]">{{algorithmItem}}</option>
-            </select>
+        <div class="flex-column-center">
+            <label for="universal">Universal</label>
+            <input [disabled]="isSolving" type="checkbox" name="universal" id="universal" [checked]="universal"[value]="universal" (change)="toggleUniversal()">
         </div>
 
         <div class="buttons-container">
@@ -84,8 +86,7 @@
         </div>
     </div>
 
-
-    <button *ngIf="isSolving else elseTemplate" type="button" class="btn btn-danger run-maze-button" (click)="isSolving = false;">
+    <button *ngIf="isSolving else elseTemplate" type="button" class="btn btn-danger run-maze-button" (click)="endMazeManually();">
         stop maze
     </button>
     <ng-template #elseTemplate>
@@ -95,40 +96,23 @@
     </ng-template>
 </div>
 
-<div class="maze-stats">
-    <span>Time Taken: <span class="stat">{{timeTaken}}</span> milliseconds</span>
-    <span>Steps Taken (with weights): <span class="stat">{{totalSteps}}</span></span>
-    <span>Total Final Path: <span class="stat">{{finalTotal}}</span></span>
-    <span>Total Tiles Seen: <span class="stat">{{seenTotal}}/{{(width * height) - wallsTotal}}</span>  (<span class="stat">{{((seenTotal / ((width * height) - wallsTotal)) * 100).toFixed(2)}}%</span>)</span>
-</div>
-
-<div class="grid-container">
-    <ul class="maze" (contextmenu)="$event.preventDefault()">
-        <li class="row" *ngFor="let row of squares; let ri = index;">
-            <div
-                [ngStyle]="{height: calcZoom(), width: calcZoom()}"
-                *ngFor="let block of row; let ci = index;"
-
-                (mouseover)="toggleTile(block)" 
-                (mousedown)="mouseIsDown = true;"
-                (mouseup)="mouseIsDown = false"
-                (dblclick)="placeGoal(block, 'end')"
-                (click)="clickToggle(block)"
-                (contextmenu)="placeGoal(block, 'start')"
-
-
-                [ngClass]="[
-                    true && 'square', 
-                    areSamePos(currentNode, block) ? 'current-tile' : '',
-                    block.weight ? 'weight' : '',
-                    block.wall ? 'wall' : '',
-                    areSamePos(getStart(), block) ? 'start-tile' : '', 
-                    areSamePos(getEnd(), block) ? 'end-tile' : '',
-                    !block.final && !areSamePos(getStart(), block) && block.seen ? 'seen-tile' : '',
-                    block.final ? 'final-tile' : '',
-                ]"
-            >
-            </div>
-        </li>
-    </ul>
+<div class="grids-container">
+    <app-menu class="menu-button" (mouseleave)="menuIsOpen = false" (click)="menuIsOpen = !menuIsOpen" [menuIsOpen]="menuIsOpen" (addAlgorithm)="addAlgorithm($event)"></app-menu>
+    <app-grid #grid *ngFor="let algorithm of algorithms; let i = index;" 
+        [algorithm]="algorithm"
+        [height]="height"
+        [width]="width"
+        [speed]="speed"
+        [diagonal]="diagonal"
+        [currentTileType]="currentTileType"
+        [zoom]="zoom"
+        [squares]="squares"
+        [start]="start"
+        [end]="end"
+        [universal]="universal"
+        (incrementStop)="incrementStop()"
+        (placeUniversalGoal)="placeUniversalGoal($event)"
+        (makeUniversal)="makeUniversal()"
+        (removeAlgorithm)="removeAlgorithm(i)"
+    ></app-grid>
 </div>

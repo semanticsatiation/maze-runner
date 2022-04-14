@@ -1,0 +1,44 @@
+
+<div class="grid-container flex-column-center">
+    <fa-icon class="trash-button" (click)="removeAlgorithm.emit()" type="button" [icon]="trash"></fa-icon>
+
+    <div class="maze-stats">
+        <span>Algorithm: <span class="stat">{{algorithm}}</span></span>
+        <span>Time Taken: <span class="stat">{{timeTaken}}</span> milliseconds</span>
+        <span>Steps Taken (with weights): <span class="stat">{{totalSteps}}</span></span>
+        <span>Total Final Path: <span class="stat">{{finalTotal}}</span></span>
+        <span>Total Tiles Seen: <span class="stat">{{seenTotal}}/{{(width * height) - wallsTotal}}</span>  (<span class="stat">{{((seenTotal / ((width * height) - wallsTotal)) * 100).toFixed(2)}}%</span>)</span>
+    </div>
+    
+
+
+    <ul [ngClass]="['maze', this.isSolving ? 'disable' : '']" (contextmenu)="$event.preventDefault()">
+        <!-- g-0 removes row spacing that comes with bootstrap -->
+        <li class="g-0 row" *ngFor="let row of squares; let ri = index;">
+            <div
+                [ngStyle]="{height: calcZoom(), width: calcZoom()}"
+                *ngFor="let block of row; let ci = index;"
+
+                (mouseover)="toggleTile(block)" 
+                (mousedown)="mouseIsDown = true;"
+                (mouseup)="mouseIsDown = false"
+                (dblclick)="placeGoal(block, 'end')"
+                (click)="clickToggle(block)"
+                (contextmenu)="placeGoal(block, 'start')"
+
+
+                [ngClass]="[
+                    'square',
+                    areSamePos(currentNode, block) ? 'current-tile' : '',
+                    block.weight ? 'weight-tile' : '',
+                    block.wall ? 'wall-tile' : '',
+                    areSamePos(getStart(), block) ? 'start-tile' : '', 
+                    areSamePos(getEnd(), block) ? 'end-tile' : '',
+                    !block.final && !areSamePos(getStart(), block) && block.seen ? 'seen-tile' : '',
+                    block.final ? 'final-tile' : '',
+                ]"
+            >
+            </div>
+        </li>
+    </ul>
+</div>

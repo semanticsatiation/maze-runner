@@ -1,0 +1,8 @@
+<fa-icon
+    [ngClass]="[menuIsOpen ? 'button-hover' : '']"
+    type="button" [icon]="faPlusCircle"
+></fa-icon>
+<ul [ngClass]="['menu-options', menuIsOpen ? 'menu-open' : '']" *ngIf="menuIsOpen">
+    <span>Algorithms</span>
+    <li *ngFor="let algorithm of algorithms" (click)="addAlgorithm.emit(algorithm)">{{algorithm}}</li>
+</ul>

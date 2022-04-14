@@ -1,0 +1,45 @@
+fa-icon {
+    position: fixed;
+    margin: 10px;
+    left: 25px;
+    font-size: 30px;
+    text-align: center;
+    line-height: 0;
+    background: #666;
+    border-radius: 0.8em;
+    filter: opacity(40%);
+    transition: 0.3s;
+}
+
+fa-icon:hover {
+    filter: opacity(80%);
+}
+
+.button-hover {
+    transform: rotate(90deg);
+}
+
+.menu-options {
+    padding: 15px;
+    border-radius: 10px;
+    background: rgb(82, 82, 82);
+    transition: 0.2s;
+
+    > span {
+        font-weight: bolder;
+        font-size: 16px;
+        text-decoration: underline;
+    }
+
+    li {
+        margin-top: 4px;
+        font-size: 15px;
+        list-style: none;
+        padding: 3px;
+        border-radius: 5px;
+    }
+    
+    li:hover {
+        background: rgb(168, 168, 168);
+    }
+}

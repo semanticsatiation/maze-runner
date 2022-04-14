@@ -1,44 +1,25 @@
-import { ThisReceiver } from '@angular/compiler';
-import { Component, OnInit } from '@angular/core';
-import { resetFakeAsyncZone } from '@angular/core/testing';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { MiniNodeObj, NodeObj } from 'src/modules/interfaces/node-obj';
+import { GridComponent } from '../grid/grid.component';
+import { ASTAR, defaultNode } from '../shared/variables';
 
-const delay = (delayInms:number) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(2);
-    }, delayInms);
-  });
-};
+export const basicDirections = [[1, 0],[0, 1],[-1, 0],[0, -1]];
+export const diagonals = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
 
-const defaultNode = {
-  f: 999, 
-  g: 999, 
-  h: 999,
-  parent: undefined, 
-  seen: false, 
-  final: false,
-  closed: false,
-  wall: false,
-  // weight cost is 20
-  weight: false
-};
+export const arraysEqual = (a:number[], b:number[]) => {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
 
-interface NodeObj {
-  pos: number[],
-  f: number, 
-  g: number, 
-  h: number,
-  parent?: NodeObj, 
-  seen: boolean, 
-  final: boolean,
-  closed: boolean,
-  wall: boolean,
-  weight: boolean
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
-interface MiniNodeObj {
-  pos: number[],
-};
+export const areSamePos = (eleObj: NodeObj | MiniNodeObj, target:NodeObj | MiniNodeObj) => {
+  return arraysEqual(eleObj.pos, target.pos);
+}
 
 @Component({
   selector: 'app-maze',
@@ -47,33 +28,23 @@ interface MiniNodeObj {
 })
 
 export class MazeComponent implements OnInit {
-  height:number = 10;
-
-  width:number = 10;
-
-  algorithm:string = "A*";
-
-  algorithms:string[] = ["A*", "Dijkstra", "Breadth First Search"];
-
-  squares: NodeObj[][] = [];
-
   start:number[] = [];
 
   end:number[] = [];
 
-  openList:NodeObj[] = [];
+  height:number = 50;
 
-  currentNode:NodeObj = {pos: [], ...defaultNode};
+  width:number = 50;
 
-  mouseIsDown = false;
+  squares: NodeObj[][] = [];
 
-  clicked:boolean = false;
-  
+  algorithms:string[] = [ASTAR];
+
   speeds:[string, string][] = [["Slow", "150"], ["Normal", "40"], ["Fast", "1"], ["Instant", "0"]];
 
-  speed:number = 40;
+  speed:number = 1;
 
-  zoom:number = 100;  
+  zoom:number = 150;  
 
   zooms:number[] = [200, 175, 150, 125, 100, 75, 50, 25]; 
 
@@ -81,143 +52,49 @@ export class MazeComponent implements OnInit {
   
   isSolving:boolean = false;
 
-  seenTotal:number = 0;
+  diagonal:boolean = false;
 
-  wallsTotal:number = 0;
+  universal:boolean = true;
 
-  seenTotalPercentage:number = 0;
+  solvedAmount:number = 0;
 
-  finalTotal:number = 0;
+  menuIsOpen:boolean = false;
 
-  totalSteps:number = 0;
-
-  timeTaken:number = 0;
+  @ViewChildren('grid', { read: GridComponent }) children!: QueryList<GridComponent>;
+  
+  constructor() {
+  }
 
   ngOnInit(): void {
     this.createSquares();
   }
 
-  createSquares() {
-    this.clearMaze();
-
-    this.squares = [...Array(this.height)].map((item, ri) => (
-      [...Array(this.width)].map((item, ci) => {
-        return {...defaultNode, pos: [ri, ci]};
-      })
-    ));
-  }
-
-  calcZoom() {
-    return ((this.zoom / 100) * 17) + "px";
-  }
-
-  changeTileType(event:Event) {
-    const target = event.target as HTMLTextAreaElement;
-
-    this.currentTileType = target.value;
-  }
-
-  adjustZoom(event:Event) {
-    const target = event.target as HTMLTextAreaElement;
-
-    this.zoom = parseInt(target.value);
-  }
-
-  isPresent(arrOfObjs:NodeObj[] | MiniNodeObj[], target:NodeObj | MiniNodeObj) {
-    return arrOfObjs.find((ele: NodeObj | MiniNodeObj) => this.areSamePos(ele, target)) !== undefined;
-  }
-
-  areSamePos(eleObj: NodeObj | MiniNodeObj, target:NodeObj | MiniNodeObj) {
-    return eleObj.pos.toString() === target.pos.toString();
-  }
-
-  clickToggle(node:NodeObj) {
-    this.clicked = true;
-
-    this.toggleTile(node);
-  }
-
-  adjustSpeed(event:Event) {
-    if (!this.isSolving) {
-      const target = event.target as HTMLTextAreaElement;
-  
-      this.speed = parseInt(target.value);
+  solve() {
+    if (this.children !== undefined && [...this.children].every(comp => comp.start.length === 2 && comp.end.length === 2)) {
+      this.solvedAmount = 0;
+      this.isSolving = true;
+      this.children.forEach((comp:GridComponent) => comp.solve());
     }
   }
 
-  setAlgorithm(event:Event) {
-    if (!this.isSolving) {
-      const target = event.target as HTMLTextAreaElement;
-  
-      this.algorithm = target.value;
+  endMazeManually() {
+    if (this.children !== undefined) {
+      this.isSolving = false;
+      // we must clear no matter what and this is because some mazes might finish before others
+      // and clearPath will only work if the maze is NOT solving meaning the finished mazes will never clear
+      this.children.forEach((comp:GridComponent) => {comp.isSolving = false; comp.clearPath();});
     }
   }
 
-  toggleTile(node:NodeObj) {
-    if (!this.isSolving && (this.mouseIsDown || this.clicked) && !this.areSamePos(node, {pos: this.start}) && !this.areSamePos(node, {pos: this.end})) {
-      this.clearPath();
-  
-      if (this.currentTileType === "walls") {
-        if (!node.wall) {
-          this.wallsTotal += 1;
-        } else {
-          this.wallsTotal -= 1;
-        }
-        
-        node.wall = !node.wall;
-      } else {
-        node.weight = !node.weight;
-      }
-    }
+  incrementStop() {
+    this.solvedAmount += 1;
 
-    this.clicked = false;
-  }
+    if (this.solvedAmount >= this.children.length) {
+      this.solvedAmount = 0;
 
-  clearMaze() {
-    if (!this.isSolving) {
-      this.squares.forEach(row => 
-        row.forEach(block => Object.assign(block, defaultNode))
-      );
+      this.isSolving = false;
 
-      this.start = [];
-      this.end = [];
-
-      // walls will always be reset when the maze is cleared
-      this.wallsTotal = 0;
-  
-      this.clearPath();
-    }
-  }
-
-  clearPath() {
-    if (!this.isSolving) {
-      this.squares.forEach(row => 
-        row.forEach(block => Object.assign(block, {...defaultNode, wall: block.wall, weight: block.weight}))
-      );
-
-      this.openList = [];
-      this.currentNode = {pos: [], ...defaultNode};
-      this.seenTotal = 0;
-      this.finalTotal = 0;
-      this.totalSteps = 0;
-      this.timeTaken = 0;
-      this.seenTotalPercentage = 0;
-    }
-  }
-
-  placeGoal(node:NodeObj, goal:string) {
-    const isStart:boolean = goal === "start";
-    const getGoal = (isStartPos:boolean) =>  isStartPos ? (this.start) : (this.end);
-    const setGoal = (goal:number[]) => isStart ? (this.start = goal) : (this.end = goal);
-
-    if (!this.isSolving && !node.wall && !node.weight && !this.areSamePos({pos: getGoal(!isStart)}, node)) {
-      if (this.areSamePos({pos: getGoal(isStart)}, node)) {
-        setGoal([]);
-      } else {
-        setGoal(node.pos);
-      }
-
-      this.clearPath(); 
+      this.children.forEach((comp:GridComponent) => comp.isSolving = false);
     }
   }
 
@@ -232,9 +109,9 @@ export class MazeComponent implements OnInit {
         value = option["number"] || 0;
       }
   
-      if (dim === "width" && !(value > 2 && value < 100)) {
+      if (dim === "width" && !(value > 2 && value < 51)) {
         value = 3;
-      } else if (dim === "height" && !(value > 0 && value < 100)) {
+      } else if (dim === "height" && !(value > 0 && value < 51)) {
         value = 1;
       }
   
@@ -248,187 +125,117 @@ export class MazeComponent implements OnInit {
     }
   }
 
-  findNeighbors(position:number[]) {
-    const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    const neighbors:NodeObj[] = [];
+  createSquares() {
+    this.clearMaze();
 
-    directions.forEach(direction => {
-      const neighborPos = [(direction[0] + position[0]), (direction[1] + position[1])];
-
-      if (neighborPos[0] >= 0 && neighborPos[0] <= (this.height - 1) && neighborPos[1] >= 0 && neighborPos[1] <= (this.width - 1)) {
-        const neighborNode = this.squares[neighborPos[0]][neighborPos[1]];
-
-        // if the neighborPos is within the maze boundaries and it is not a wall or closed, push it into the neighbors array
-        if (!neighborNode.wall && !neighborNode.closed) {
-          if (this.algorithm !== "A*") {
-            neighbors.push(neighborNode);
-          } else {
-            neighbors.unshift(neighborNode);
-          }
-        }
-      }
-    });
-
-    return neighbors;
+    this.squares = [...Array(this.height)].map((item, ri) => (
+      [...Array(this.width)].map((item, ci) => {
+        return {...defaultNode, pos: [ri, ci]};
+      })
+    ));
   }
 
-  filterNeighbors() {
-    const adjacentSquares = this.findNeighbors(this.currentNode.pos);
+  clearMaze() {
+    if (!this.isSolving) {
+      if (this.universal) {
+        // if we solve and then clear maze, we will not have a universal grid since the
+        // similarity between all graphs is lost when they start solving using their own algorithms
+        this.makeUniversal();
 
-    for (let index = 0; index < adjacentSquares.length; index++) {
-      const neighborNode = adjacentSquares[index];
-
-      const isNotInQueue = !this.isPresent(this.openList, neighborNode);
-
-      if (this.algorithm === "Breadth First Search") {
-        if (isNotInQueue) {
-          neighborNode.parent = this.currentNode;
-          this.openList.push(neighborNode);
-        }
+        this.squares.forEach(row => 
+          row.forEach(block => Object.assign(block, defaultNode))
+        );
+  
+        this.start = [];
+        this.end = [];
+        this.clearPath();
       } else {
-        // if the neighbor is weighted, make sure to take it into account
-        const tempGScore = this.currentNode.g + this.distanceFromTo(neighborNode, this.currentNode) + (neighborNode.weight ? (neighborNode.g + 20) : (0));
-
-        if (isNotInQueue) {
-          if (this.algorithm !== "A*") {
-            this.openList.push(neighborNode);
-          } else {
-            this.openList.unshift(neighborNode);
-          }
-        // no need to update the neighborNode if the tempGScore is not lower than neighborNode.g (a better path was not found)
-        // end the element here if bottom is true
-        } else if (tempGScore >= neighborNode.g) {
-            continue;
-        }
-  
-        // gscore = distance between the current node and the neighboring node
-        neighborNode.g = tempGScore;
-  
-
-        if (this.algorithm === "A*") {
-          // hscore = estimated distance from the current node to the end node.
-          neighborNode.h = this.distanceFromTo(neighborNode, this.getEnd()); 
-        }
-  
-        // f = g + h
-        // lowest fscore is best path
-        neighborNode.f = this.algorithm === "A*" ? (neighborNode.g + neighborNode.h) : (neighborNode.g);
-  
-        // the current node will be the parent of its neighbors
-        neighborNode.parent = this.currentNode;
-      }
-
-      if (isNotInQueue) {
-        neighborNode.seen = true;
-        this.seenTotal += 1;
+        this.children.forEach((comp) => comp.clearMaze());
       }
     }
   }
 
-  async solve() {
-    if (this.start.length === 2 && this.end.length === 2) {
+  makeUniversal() {
+    if (this.children !== undefined && this.children.length > 1) {
+      const firstChild = this.children.first;
+      this.squares = firstChild.squares;
+      [...this.children].slice(1).forEach((comp) => {comp.start = firstChild.start; comp.end = firstChild.end;});
+    }
+  }
+
+  clearPath() {
+    if (!this.isSolving) {
+      this.squares.forEach(row => 
+        row.forEach(block => Object.assign(block, {...defaultNode, wall: block.wall, weight: block.weight}))
+      );
+
+      if (this.children !== undefined) {
+        this.children.forEach((comp:GridComponent) => comp.clearPath());
+      }
+    }
+  }
+
+  changeTileType(event:Event) {
+    const target = event.target as HTMLTextAreaElement;
+
+    this.currentTileType = target.value;
+  }
+
+  adjustZoom(event:Event) {
+    const target = event.target as HTMLTextAreaElement;
+
+    this.zoom = parseInt(target.value);
+  }
+
+  placeUniversalGoal(arr:[NodeObj, string]) {
+    const node = arr[0];
+    const goalType = arr[1];
+
+    const isStart:boolean = goalType === "start";
+    const getGoal = (isStartPos:boolean) =>  isStartPos ? (this.start) : (this.end);
+    const setGoal = (goalPos:number[]) => isStart ? (this.start = goalPos) : (this.end = goalPos);
+
+    if (!this.isSolving && !node.wall && !node.weight && !areSamePos({pos: getGoal(!isStart)}, node)) {
+      if (areSamePos({pos: getGoal(isStart)}, node)) {
+        setGoal([]);
+      } else {
+        setGoal(node.pos);
+      }
+      
       this.clearPath();
-      this.isSolving = true;
+    }
+  }
 
-      const performance = window.performance;
-
-      const startTime = performance.now();
-
-      const current = this.getStart();
-
-      // this is to take the start into account since it is never actaully seen
-      this.seenTotal += 1;
-
-      this.currentNode = current;
-      this.openList = [current];
-
-      // the starting position will always be the best position
-      this.currentNode.f = 0;
-      this.currentNode.g = 0;
+  adjustSpeed(event:Event) {
+    if (!this.isSolving) {
+      const target = event.target as HTMLTextAreaElement;
   
-      while (this.openList.length !== 0 && !this.areSamePos(this.currentNode, {pos: this.end}) && this.isSolving) {
-        if (!["Breadth First Search"].includes(this.algorithm)) {
-          if (this.algorithm === "A*") {
-            // a* algorithm (informed) f(n) = g(n) + h(n)
-            this.currentNode = this.bestNodeChoice(this.openList, (node:NodeObj) => node.f);
-          } else if (this.algorithm === "Dijkstra") {
-            // Dijkstra’s algorithm (uninformed) f(n) = g(n)
-            this.currentNode = this.bestNodeChoice(this.openList, (node:NodeObj) => node.g);
-          }
+      this.speed = parseInt(target.value);
+    }
+  }
 
-          const posInd = this.openList.findIndex(ele => this.areSamePos(ele, this.currentNode));
-          this.openList.splice(posInd, 1);
-        } else {
-          if (this.algorithm === "Breadth First Search") {
-            this.currentNode = this.openList.shift()!;
-          }
-        }
-
-        this.currentNode.closed = true;
-        this.filterNeighbors();
-
-        if (this.speed !== 0) {
-          let delayRes = await delay(this.speed);
-        }
-      }
-
-      if (this.isSolving) {
-        this.timeTaken = Math.trunc(performance.now() - startTime);
-
-        let currentNode = this.getEnd();
+  addAlgorithm(algorithm:string) {
+    if (!this.isSolving) {
   
-    
-        while (currentNode.parent !== undefined && this.isSolving) {
-          currentNode = currentNode.parent;
-          currentNode.final = true;
-          
-          this.finalTotal += 1;
-  
-          if (currentNode.weight) {
-            this.totalSteps = this.totalSteps + 21;
-          } else {
-            this.totalSteps += 1;
-          }
-          let delayRes = await delay(10);
-        }
-      }
-
-      // this will only execute if this.isSolving is already false
-      // meaning the user ended the maze solving themselves 
-      this.clearPath();
-
-      this.isSolving = false;    
+      this.algorithms.push(algorithm);
     }
   }
 
-  bestNodeChoice(positions:NodeObj[], determineValue:Function) {
-    // pick the position with the best fScore
-    let lowInd = 0;
-
-    for (let index = 0; index < positions.length; index++) {
-      if (determineValue(positions[index]) < determineValue(positions[lowInd])) { 
-        lowInd = index; 
-      }
+  removeAlgorithm(index:number) {
+    if (!this.isSolving) {
+      this.algorithms.splice(index, 1);
     }
-
-    return positions[lowInd];
   }
 
-  getStart() {
-    if (this.start.length === 2) {
-      return this.squares[this.start[0]][this.start[1]];
+  toggleUniversal() {
+    if (!this.isSolving) {
+      this.universal = !this.universal;
     }
-    return {...defaultNode, pos: []};
   }
 
-  getEnd() {
-    if (this.end.length === 2) {
-      return this.squares[this.end[0]][this.end[1]];
+  toggleDiagonal() {
+    if (!this.isSolving) {
+      this.diagonal = !this.diagonal;
     }
-    return {...defaultNode, pos: []};
-  }
-
-  distanceFromTo(from:NodeObj, to:NodeObj) {
-    return Math.abs(from.pos[0] - to.pos[0]) + Math.abs(from.pos[1] - to.pos[1]);
   }
 }
