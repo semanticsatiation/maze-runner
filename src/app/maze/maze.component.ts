@@ -32,9 +32,9 @@ export class MazeComponent implements OnInit {
 
   end:number[] = [];
 
-  height:number = 50;
+  height:number = 10;
 
-  width:number = 50;
+  width:number = 10;
 
   squares: NodeObj[][] = [];
 
@@ -42,9 +42,9 @@ export class MazeComponent implements OnInit {
 
   speeds:[string, string][] = [["Slow", "150"], ["Normal", "40"], ["Fast", "1"], ["Instant", "0"]];
 
-  speed:number = 1;
+  speed:number = 40;
 
-  zoom:number = 150;  
+  zoom:number = 100;  
 
   zooms:number[] = [200, 175, 150, 125, 100, 75, 50, 25]; 
 
@@ -54,7 +54,7 @@ export class MazeComponent implements OnInit {
 
   diagonal:boolean = false;
 
-  universal:boolean = true;
+  universal:boolean = false;
 
   solvedAmount:number = 0;
 

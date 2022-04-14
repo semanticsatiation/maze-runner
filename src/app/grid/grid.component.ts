@@ -20,8 +20,8 @@ const delay = (delayInms:number) => {
 })
 
 export class GridComponent implements OnInit, OnChanges {
-  @Input() height:number = 0;
-  @Input() width:number = 0;
+  @Input() height:number = 10;
+  @Input() width:number = 10;
   @Input() speed:number = 40;
   @Input() diagonal:boolean = false;
   @Input() currentTileType:string = "walls";
@@ -68,6 +68,9 @@ export class GridComponent implements OnInit, OnChanges {
   constructor() { }
 
   ngOnInit(): void {
+    if (!this.universal) {
+      this.createSquares();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
