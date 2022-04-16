@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { MiniNodeObj, NodeObj } from 'src/modules/interfaces/node-obj';
 import { GridComponent } from '../grid/grid.component';
 import { ASTAR, defaultNode } from '../shared/variables';
@@ -69,7 +69,7 @@ export class MazeComponent implements OnInit {
 
   @ViewChildren('grid', { read: GridComponent }) children!: QueryList<GridComponent>;
   
-  constructor(private elementRef:ElementRef) {
+  constructor() {
   }
 
   ngOnInit(): void {

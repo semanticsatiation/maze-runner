@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Optional, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import BinaryMinHeap from 'src/modules/classes/binary-min-heap';
 import { basicDirections, BFS, defaultNode, DFS, diagonals, DIJ, GBFS } from '../shared/variables';
 import {NodeObj} from 'src/modules/interfaces/node-obj';
-import { areSamePos, MazeComponent } from '../maze/maze.component';
+import { areSamePos } from '../maze/maze.component';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 const delay = (delayInms:number) => {
@@ -78,6 +78,8 @@ export class GridComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
+    
     //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
     //Add '${implements OnChanges}' to the class.
     if (changes["height"] !== undefined || changes["width"] !== undefined ) {  
@@ -125,7 +127,7 @@ export class GridComponent implements OnInit, OnChanges {
 
   toggleTile(node:NodeObj) {
     if (!this.isSolving && (this.mouseIsDown || this.clicked) && !areSamePos(node, {pos: this.start}) && !areSamePos(node, {pos: this.end})) {
-      // // this is to fix the problem of the grids not staying universal after we start and end the solving process
+      // this is to fix the problem of the grids not staying universal after we start and end the solving process
       if (this.universal && this.resetUniversal) {
         this.makeUniversal.emit();
         this.resetUniversal = false;
