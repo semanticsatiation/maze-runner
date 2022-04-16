@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Optional, Output, SimpleChanges } from '@angular/core';
 import BinaryMinHeap from 'src/modules/classes/binary-min-heap';
 import { basicDirections, BFS, defaultNode, DFS, diagonals, DIJ, GBFS } from '../shared/variables';
 import {NodeObj} from 'src/modules/interfaces/node-obj';
-import { areSamePos } from '../maze/maze.component';
+import { areSamePos, MazeComponent } from '../maze/maze.component';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 const delay = (delayInms:number) => {
@@ -31,8 +31,10 @@ export class GridComponent implements OnInit, OnChanges {
   @Input() squares:NodeObj[][] = [];
   @Input() start:number[] = [];
   @Input() end:number[] = [];
+  @Input() wallsTotal:number = 0;
 
   @Output() placeUniversalGoal = new EventEmitter<any>();
+  @Output() placeUniversalTile = new EventEmitter<any>();
   @Output() incrementStop = new EventEmitter<any>();
   @Output() makeUniversal = new EventEmitter<any>();
   @Output() removeAlgorithm = new EventEmitter<any>();
@@ -51,8 +53,6 @@ export class GridComponent implements OnInit, OnChanges {
 
   seenTotal:number = 0;
 
-  wallsTotal:number = 0;
-
   seenTotalPercentage:number = 0;
 
   finalTotal:number = 0;
@@ -65,28 +65,37 @@ export class GridComponent implements OnInit, OnChanges {
 
   areSamePos = areSamePos;
   
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit(): void {
+    if (!this.universal) {
+      this.createSquares();
+
+      this.start = [];
+      this.end = [];
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
     //Add '${implements OnChanges}' to the class.
-    if (changes["universal"] !== undefined && changes["universal"].previousValue === true && changes["universal"].currentValue === false) {  
-      this.makeUnique();
-    } else if (changes["universal"] !== undefined && changes["universal"].previousValue === false && changes["universal"].currentValue === true) {
-      this.makeUniversal.emit();
-
-      this.clearPath();
+    if (changes["height"] !== undefined || changes["width"] !== undefined ) {  
+      if (!this.universal) {
+        this.makeUnique();
+      }
     }
   }
 
   makeUnique() {
     this.squares = JSON.parse(JSON.stringify(this.squares));
+
+    this.clearPath();
   }
 
   createSquares() {
+    this.clearMaze();
+
     this.squares = [...Array(this.height)].map((item, ri) => (
       [...Array(this.width)].map((item, ci) => {
         return {...defaultNode, pos: [ri, ci]};
@@ -116,25 +125,28 @@ export class GridComponent implements OnInit, OnChanges {
 
   toggleTile(node:NodeObj) {
     if (!this.isSolving && (this.mouseIsDown || this.clicked) && !areSamePos(node, {pos: this.start}) && !areSamePos(node, {pos: this.end})) {
-
-      // this is to fix the problem of the grids not staying universal after we start and end the solving process
+      // // this is to fix the problem of the grids not staying universal after we start and end the solving process
       if (this.universal && this.resetUniversal) {
         this.makeUniversal.emit();
         this.resetUniversal = false;
       }
-
-      this.clearPath();
   
-      if (this.currentTileType === "walls") {
-        if (!node.wall) {
-          this.wallsTotal += 1;
+      if (!this.universal) {
+        this.clearPath();
+
+        if (this.currentTileType === "walls") {
+          if (!node.wall) {
+            this.wallsTotal += 1;
+          } else {
+            this.wallsTotal -= 1;
+          }
+          
+          node.wall = !node.wall;
         } else {
-          this.wallsTotal -= 1;
+          node.weight = !node.weight;
         }
-        
-        node.wall = !node.wall;
       } else {
-        node.weight = !node.weight;
+        this.placeUniversalTile.emit(node.pos);
       }
     }
 
@@ -149,6 +161,9 @@ export class GridComponent implements OnInit, OnChanges {
 
       this.start = [];
       this.end = [];
+
+      this.wallsTotal = 0;
+
       this.clearPath();
     }
   }
@@ -216,9 +231,8 @@ export class GridComponent implements OnInit, OnChanges {
     this.openList.push(current);
 
     // the starting position will always be the best position
+    this.currentNode.f = 0;
     this.currentNode.g = 0;
-    this.currentNode.h = this.distanceFromTo(this.currentNode, this.getEnd());
-    this.currentNode.f = this.currentNode.g + this.currentNode.h;
 
     while (this.openList.priorityQueue.length !== 0 && !areSamePos(this.currentNode, {pos: this.end}) && this.isSolving) {
       if ([BFS, DFS].includes(this.algorithm)) {
@@ -356,7 +370,7 @@ export class GridComponent implements OnInit, OnChanges {
         const weight = neighborNode.weight ? (20) : (0);
         // if the neighbor is weighted, make sure to take it into account
         // add distance from currentNode.g to the distance between currentNode and neighbor and then add the weight
-        const tempGScore = this.currentNode.g + this.distanceFromTo(neighborNode, this.currentNode) + weight;
+        const tempGScore = this.currentNode.g + this.distanceFromTo(neighborNode, this.currentNode) + (neighborNode.weight ? (neighborNode.g + 20) : (0));
     
         // no need to update the neighborNode if the tempGScore is not lower than neighborNode.g (a better path was not found)
         // end the element here if bottom is true

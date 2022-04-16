@@ -1,4 +1,4 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { MiniNodeObj, NodeObj } from 'src/modules/interfaces/node-obj';
 import { GridComponent } from '../grid/grid.component';
 import { ASTAR, defaultNode } from '../shared/variables';
@@ -60,18 +60,24 @@ export class MazeComponent implements OnInit {
 
   menuIsOpen:boolean = false;
 
+  childrenTotal:number = 1;
+
+  wallsTotal:number = 0;
+
+  timeoutHandler: NodeJS.Timeout | null | undefined;
+
+
   @ViewChildren('grid', { read: GridComponent }) children!: QueryList<GridComponent>;
   
-  constructor() {
+  constructor(private elementRef:ElementRef) {
   }
 
   ngOnInit(): void {
     this.createSquares();
-    
   }
 
   solve() {
-    if (this.children !== undefined && [...this.children].every(comp => comp.start.length === 2 && comp.end.length === 2)) {
+    if (this.childrenTotal > 0 && [...this.children].every(comp => comp.start.length === 2 && comp.end.length === 2)) {
       this.solvedAmount = 0;
       this.isSolving = true;
       this.children.forEach((comp:GridComponent) => comp.solve());
@@ -79,18 +85,16 @@ export class MazeComponent implements OnInit {
   }
 
   endMazeManually() {
-    if (this.children !== undefined) {
-      this.isSolving = false;
-      // we must clear no matter what and this is because some mazes might finish before others
-      // and clearPath will only work if the maze is NOT solving meaning the finished mazes will never clear
-      this.children.forEach((comp:GridComponent) => {comp.isSolving = false; comp.clearPath();});
-    }
+    this.isSolving = false;
+    // we must clear no matter what and this is because some mazes might finish before others
+    // and clearPath will only work if the maze is NOT solving meaning the finished mazes will never clear
+    this.children.forEach((comp:GridComponent) => {comp.isSolving = false; comp.clearPath();});
   }
 
   incrementStop() {
     this.solvedAmount += 1;
 
-    if (this.solvedAmount >= this.children.length) {
+    if (this.solvedAmount >= this.childrenTotal) {
       this.solvedAmount = 0;
 
       this.isSolving = false;
@@ -99,7 +103,28 @@ export class MazeComponent implements OnInit {
     }
   }
 
-  setDimensions(option:{event:Event | undefined, number:number | undefined}, dim:string) {
+  mousedown(action:Function, dimType:string) {
+    this.timeoutHandler = setInterval(() => {
+      this.setDimensions({event: undefined, number: action(dimType === "height" ? (this.height) : (this.width))}, dimType);
+    }, 50);
+  }
+
+  increaseNumber(num:number) {
+    return num + 1;
+  }
+
+  decreaseNumber(num:number) {
+    return num - 1; 
+  }
+
+  mouseup() {
+    if (this.timeoutHandler) {
+      clearInterval(this.timeoutHandler);
+      this.timeoutHandler = null;
+    }
+  }
+
+  setDimensions(option:{event:Event | undefined, number:number | undefined}, dimType:string) {
     if (!this.isSolving) {
       let value:number;
 
@@ -110,15 +135,23 @@ export class MazeComponent implements OnInit {
         value = option["number"] || 0;
       }
   
-      if (dim === "width" && !(value > 2 && value < 51)) {
-        value = 3;
-      } else if (dim === "height" && !(value > 0 && value < 51)) {
-        value = 1;
+      if (dimType === "width") {
+        if (value > 50) {
+          value = 3;
+        } else if (value < 3) {
+          value = 50;
+        }
+      } else if (dimType === "height") {
+        if (value > 50) {
+          value = 1;
+        } else if (value < 1) {
+          value = 50;
+        }
       }
   
-      if (dim === "width") {
+      if (dimType === "width") {
         this.width = value;
-      } else if (dim === "height") {
+      } else if (dimType === "height") {
         this.height = value;
       }
   
@@ -142,37 +175,21 @@ export class MazeComponent implements OnInit {
         // if we solve and then clear maze, we will not have a universal grid since the
         // similarity between all graphs is lost when they start solving using their own algorithms
         this.makeUniversal();
-
-        this.squares.forEach(row => 
-          row.forEach(block => Object.assign(block, defaultNode))
-        );
-  
-        this.start = [];
-        this.end = [];
-        this.clearPath();
-      } else if (this.children !== undefined) {
-        this.children.forEach((comp) => comp.clearMaze());
       }
-    }
-  }
 
-  makeUniversal() {
-    if (this.children !== undefined && this.children.length > 1) {
-      const firstChild = this.children.first;
-      this.squares = firstChild.squares;
-      [...this.children].slice(1).forEach((comp) => {comp.start = firstChild.start; comp.end = firstChild.end;});
+      if (this.children) {
+        this.children.forEach((comp:GridComponent) => comp.clearMaze());
+      }
+
+      this.wallsTotal = 0;
+      this.start = [];
+      this.end = [];
     }
   }
 
   clearPath() {
-    if (!this.isSolving) {
-      this.squares.forEach(row => 
-        row.forEach(block => Object.assign(block, {...defaultNode, wall: block.wall, weight: block.weight}))
-      );
-
-      if (this.children !== undefined) {
-        this.children.forEach((comp:GridComponent) => comp.clearPath());
-      }
+    if (!this.isSolving && this.children) {
+      this.children.forEach((comp:GridComponent) => comp.clearPath());
     }
   }
 
@@ -202,35 +219,83 @@ export class MazeComponent implements OnInit {
       } else {
         setGoal(node.pos);
       }
-      
+
       this.clearPath();
     }
   }
 
+  placeUniversalTile(pos:number[]) {
+    if (this.currentTileType === "walls") {
+      if (!this.squares[pos[0]][pos[1]].wall) {
+        this.wallsTotal += 1;
+      } else {
+        this.wallsTotal -= 1;
+      }
+
+      this.squares[pos[0]][pos[1]].wall = !this.squares[pos[0]][pos[1]].wall;
+    } else {
+      this.squares[pos[0]][pos[1]].weight = !this.squares[pos[0]][pos[1]].weight;
+    } 
+  }
+
   adjustSpeed(event:Event) {
-    if (!this.isSolving) {
-      const target = event.target as HTMLTextAreaElement;
-  
-      this.speed = parseInt(target.value);
-    }
+    const target = event.target as HTMLTextAreaElement;
+
+    this.speed = parseInt(target.value);
   }
 
   addAlgorithm(algorithm:string) {
     if (!this.isSolving) {
   
       this.algorithms.push(algorithm);
+
+      this.clearPath();
+
+      this.childrenTotal += 1;
     }
   }
 
   removeAlgorithm(index:number) {
     if (!this.isSolving) {
       this.algorithms.splice(index, 1);
+
+      this.childrenTotal -= 1;
+
+      if (this.universal && this.childrenTotal <= 0) {
+        // if we delete all grids, make sure the next grid that is added is clear
+        this.clearMaze();
+      }
+    }
+  }
+
+  makeUniversal() {
+    if (this.childrenTotal > 0) {
+      const firstChild = this.children.first;
+    
+      this.squares = firstChild.squares;
+  
+      // by destructuring, we can ensure that each child componenet see this as a change
+      // angular only detects array changes based on the reference and not the contents of the array
+      this.start = [...firstChild.start];
+      this.end = [...firstChild.end];
+  
+      this.wallsTotal = firstChild.wallsTotal;
+  
+      this.children.forEach((comp:GridComponent) => comp.wallsTotal = firstChild.wallsTotal);
+  
+      this.clearPath();
     }
   }
 
   toggleUniversal() {
     if (!this.isSolving) {
       this.universal = !this.universal;
+
+      if (this.universal) {
+        this.makeUniversal();
+      } else {
+        this.children.forEach((comp:GridComponent) => comp.makeUnique());
+      }
     }
   }
 

@@ -14,7 +14,7 @@
         <div class="flex-column-center">
             <label for="speed">Speed</label>
 
-            <select [disabled]="isSolving" name="speed" id="speed" [value]="speed" (change)="adjustSpeed($event)">
+            <select name="speed" id="speed" [value]="speed" (change)="adjustSpeed($event)">
                 <option *ngFor="let speedItem of speeds; let i = index;" [selected]="speedItem[1] === speed.toString()" [value]="speeds[i][1]">{{speedItem[0]}}</option>
             </select>
         </div>
@@ -53,13 +53,13 @@
 
                 <div>
                     <span>
-                        <button [disabled]="isSolving" class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: height - 1}, 'height')" type="button">
+                        <button [disabled]="isSolving" class="btn btn-danger btn-number" (mousedown)="mousedown(decreaseNumber, 'height')" (mouseup)="mouseup()" type="button">
                             -
                         </button>
                     </span>
-                    <input id="height" name="height" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'height')" [disabled]="isSolving" type="text" [value]="height">
+                    <input [disabled]="isSolving" type="text" [value]="height" id="height" name="height" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'height')">
                     <span>
-                        <button [disabled]="isSolving" class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: height + 1}, 'height')" type="button">
+                        <button [disabled]="isSolving" class="btn btn-success btn-number" (mousedown)="mousedown(increaseNumber, 'height')" (mouseup)="mouseup()" type="button">
                             +
                         </button>
                     </span>
@@ -71,13 +71,13 @@
 
                 <div>
                     <span>
-                        <button [disabled]="isSolving" class="btn btn-danger btn-number" (click)="setDimensions({event: undefined, number: width - 1}, 'width')" type="button">
+                        <button [disabled]="isSolving" class="btn btn-danger btn-number" (mousedown)="mousedown(decreaseNumber, 'width')" (mouseup)="mouseup()" type="button">
                             -
                         </button>
                     </span>
-                    <input id="width" name="width" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'width')" [disabled]="isSolving" type="text" [value]="width">
+                    <input [disabled]="isSolving" type="text" [value]="width" id="width" name="width" class="form-control" (change)="setDimensions({event: $event, number: undefined}, 'width')">
                     <span>
-                        <button [disabled]="isSolving" class="btn btn-success btn-number" (click)="setDimensions({event: undefined, number: width + 1}, 'width')" type="button">
+                        <button [disabled]="isSolving" class="btn btn-success btn-number" (mousedown)="mousedown(increaseNumber, 'width')" (mouseup)="mouseup()" type="button">
                             +
                         </button>
                     </span>
@@ -98,7 +98,7 @@
 
 <div class="grids-container">
     <app-menu class="menu-button" (mouseleave)="menuIsOpen = false" (click)="menuIsOpen = !menuIsOpen" [menuIsOpen]="menuIsOpen" (addAlgorithm)="addAlgorithm($event)"></app-menu>
-    <app-grid #grid *ngFor="let algorithm of algorithms; let i = index;" 
+    <app-grid #grid *ngFor="let algorithm of algorithms; let i = index;"
         [algorithm]="algorithm"
         [height]="height"
         [width]="width"
@@ -110,9 +110,11 @@
         [start]="start"
         [end]="end"
         [universal]="universal"
+        [wallsTotal]="wallsTotal"
         (incrementStop)="incrementStop()"
         (placeUniversalGoal)="placeUniversalGoal($event)"
         (makeUniversal)="makeUniversal()"
         (removeAlgorithm)="removeAlgorithm(i)"
+        (placeUniversalTile)="placeUniversalTile($event)"
     ></app-grid>
 </div>
