@@ -117,7 +117,7 @@ export class MazeComponent implements OnInit {
     return num - 1; 
   }
 
-  mouseup() {
+  mouseUp() {
     if (this.timeoutHandler) {
       clearInterval(this.timeoutHandler);
       this.timeoutHandler = null;
